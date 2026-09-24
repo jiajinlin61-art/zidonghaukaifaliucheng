@@ -1,0 +1,64 @@
+schema_version: '1.0'
+task_id: P07-S01-T01
+revision: 1
+title: Reconcile interrupted attempts
+type: implementation
+objective: Recover `RUNNING`, `ROUTED`, `PARSING`, and `VERIFYING` attempts using
+  manifests, checkpoints, leases, and committed raw results.
+scope:
+  include:
+  - src/uads/recovery
+  - tests/recovery
+  exclude: []
+dependencies:
+- P05-S02-T02
+- P06-S01-T01
+- P02-S01-T02
+inputs:
+- SYSTEM_SPEC_V1_REV2.md
+- IMPLEMENTATION_PLAN.md
+- .uads/tasks/P05-S02-T02.yaml
+- .uads/tasks/P06-S01-T01.yaml
+- .uads/tasks/P02-S01-T02.yaml
+constraints:
+- Follow Revision 2 contracts and fail-closed validation.
+- Do not modify the HR project.
+- Do not start a later Phase before the current Stage gate passes.
+acceptance_criteria:
+- statement: committed results resume parsing/verification; missing results recover
+    or retry with a new attempt ID; exhausted budgets reach `NEEDS_HUMAN`.
+  verification: automated_or_reviewed
+  id: AC-01
+- id: AC-02
+  statement: Restart preserves unresolved human/policy requests and never resumes
+    blocked work without a valid decision.
+  verification: automated
+required_capabilities:
+- code_editing
+- structured_output
+- tool_use
+risk: high
+complexity: high
+recommended_executor: local-process executor
+recommended_model_profile: coding-reasoning
+validation:
+  gate: crash-point matrix passes and startup is idempotent.
+  completion_signal: recovery matrix passes twice from identical state.
+autonomy:
+  mode: stage-gated
+expected_outputs:
+- reconciliation report and recovery events.
+retry_budget:
+  task: 2
+  stage: 4
+  run: 1
+scope_description: startup reconciliation and recovery tests.
+non_goals:
+- provider-specific production integrations
+- distributed queues
+- UI
+- HR project changes
+allowed_changes:
+  paths:
+  - src/uads/recovery
+  - tests/recovery

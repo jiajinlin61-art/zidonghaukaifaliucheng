@@ -1,0 +1,65 @@
+version: V1.1
+name: Universal AI Development Workflow
+operating_modes: [standalone_master, delegated_worker]
+mode_options: [FAST, STANDARD, FULL]
+complexity_options: [TRIVIAL, SIMPLE, STANDARD, COMPLEX, CRITICAL]
+
+roles:
+  project_controller: external_or_codex_master
+  planner: planning
+  worker: implementation
+  debugger: diagnosis_and_repair
+  reviewer: independent_review
+
+model_profiles:
+  - planning-deep
+  - coding-economy
+  - coding-fast
+  - coding-standard
+  - coding-complex
+  - coding-critical
+  - visual-coding
+  - debug-standard
+  - debug-deep
+  - review-standard
+  - review-critical
+
+execution_backends: [codex, claude-code]
+routing_config: routing/MODEL_BINDINGS.yaml
+routing_tool: ../tools/model_router.py
+routing_preflight_tool: ../tools/route_preflight.py
+project_start_gate_validator: ../tools/project_start_gate_validate.py
+contract_validator: ../tools/execution_contract_validate.py
+execution_contract_version: "1.3"
+
+required_gates:
+  FAST: [project_start_if_triggered, route, combined]
+  STANDARD: [project_start_if_triggered, route, Task, independent_review, integration]
+  FULL: [project_start, route, Task, Stage, Phase, independent_review, integration]
+
+hard_invariants:
+  - no_implementation_before_required_plan_approval
+  - no_worker_without_resolved_route_and_preflight
+  - delegated_worker_must_match_resolved_route
+  - controller_does_not_implement_without_explicit_override
+  - model_reviewer_uses_independent_session
+  - completed_model_review_matches_resolved_review_route
+  - worker_and_model_review_require_invocation_evidence
+
+required_policies:
+  - project_start_gate
+  - model_routing
+  - executor
+  - quality_gates
+  - context
+  - recovery
+  - retry
+  - approval
+  - git
+
+handoff_templates:
+  project_start_gate: templates/PROJECT_START_GATE.yaml
+  request: templates/EXECUTION_REQUEST.yaml
+  result: templates/EXECUTION_RESULT.yaml
+
+uads_required: false

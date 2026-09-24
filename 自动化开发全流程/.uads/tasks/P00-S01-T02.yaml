@@ -1,0 +1,55 @@
+schema_version: '1.0'
+task_id: P00-S01-T02
+revision: 1
+title: Establish coding and evidence conventions
+type: implementation
+objective: Define the conventions used by later Tasks for schemas, errors, event evidence, and test naming.
+scope:
+  include:
+  - docs/DEVELOPMENT.md
+  - tests/helpers
+  exclude: []
+dependencies:
+- P00-S01-T01
+inputs:
+- SYSTEM_SPEC_V1_REV2.md
+- IMPLEMENTATION_PLAN.md
+- .uads/tasks/P00-S01-T01.yaml
+constraints:
+- Follow Revision 2 contracts and fail-closed validation.
+- Do not modify the HR project.
+- Do not start a later Phase before the current Stage gate passes.
+acceptance_criteria:
+- statement: conventions cover canonical JSON/YAML inputs, error codes, artifact paths, and quality-gate
+    evidence.
+  verification: automated_or_reviewed
+  id: AC-01
+required_capabilities:
+- code_editing
+- structured_output
+- tool_use
+risk: low
+complexity: low
+recommended_executor: local-process executor
+recommended_model_profile: coding-reasoning
+validation:
+  gate: documentation review against Revision 2 sections 2, 3, 10, 15, and 18.
+  completion_signal: reviewed convention document plus passing helper tests.
+autonomy:
+  mode: stage-gated
+expected_outputs:
+- developer contract and reusable test helpers, if needed.
+retry_budget:
+  task: 2
+  stage: 4
+  run: 1
+scope_description: project developer documentation and test helpers only.
+non_goals:
+- provider-specific production integrations
+- distributed queues
+- UI
+- HR project changes
+allowed_changes:
+  paths:
+  - docs/DEVELOPMENT.md
+  - tests/helpers

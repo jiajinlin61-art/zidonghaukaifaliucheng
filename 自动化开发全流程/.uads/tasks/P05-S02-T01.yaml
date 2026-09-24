@@ -1,0 +1,57 @@
+schema_version: '1.0'
+task_id: P05-S02-T01
+revision: 1
+title: Implement local executor protocol
+type: implementation
+objective: Define the minimal executor adapter that accepts a Context Bundle and returns raw structured-result
+  artifacts.
+scope:
+  include:
+  - src/uads/supervisor
+  - tests/supervisor
+  exclude: []
+dependencies:
+- P04-S02-T02
+- P05-S01-T02
+inputs:
+- SYSTEM_SPEC_V1_REV2.md
+- IMPLEMENTATION_PLAN.md
+- .uads/tasks/P04-S02-T02.yaml
+- .uads/tasks/P05-S01-T02.yaml
+constraints:
+- Follow Revision 2 contracts and fail-closed validation.
+- Do not modify the HR project.
+- Do not start a later Phase before the current Stage gate passes.
+acceptance_criteria:
+- statement: executor cannot directly mark success; raw output is persisted before parsing.
+  verification: automated_or_reviewed
+  id: AC-01
+required_capabilities:
+- code_editing
+- structured_output
+- tool_use
+risk: medium
+complexity: medium
+recommended_executor: local-process executor
+recommended_model_profile: coding-reasoning
+validation:
+  gate: success, failure, malformed-output, and crash fake-executor tests pass.
+  completion_signal: executor protocol suite passes.
+autonomy:
+  mode: stage-gated
+expected_outputs:
+- executor adapter and test doubles.
+retry_budget:
+  task: 2
+  stage: 4
+  run: 1
+scope_description: executor interface and local fake executor; no external provider SDK.
+non_goals:
+- provider-specific production integrations
+- distributed queues
+- UI
+- HR project changes
+allowed_changes:
+  paths:
+  - src/uads/supervisor
+  - tests/supervisor

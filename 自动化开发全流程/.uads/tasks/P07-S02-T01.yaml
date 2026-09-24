@@ -1,0 +1,60 @@
+schema_version: '1.0'
+task_id: P07-S02-T01
+revision: 1
+title: Enforce path, command, and secret boundaries
+type: implementation
+objective: Apply trust-boundary rules to worker output, repository content, external responses, paths,
+  commands, and secrets.
+scope:
+  include:
+  - src/uads/security
+  - tests/security
+  exclude: []
+dependencies:
+- P04-S01-T01
+- P04-S02-T01
+- P05-S02-T01
+inputs:
+- SYSTEM_SPEC_V1_REV2.md
+- IMPLEMENTATION_PLAN.md
+- .uads/tasks/P04-S01-T01.yaml
+- .uads/tasks/P04-S02-T01.yaml
+- .uads/tasks/P05-S02-T01.yaml
+constraints:
+- Follow Revision 2 contracts and fail-closed validation.
+- Do not modify the HR project.
+- Do not start a later Phase before the current Stage gate passes.
+acceptance_criteria:
+- statement: prose cannot trigger commands; out-of-scope access and secret exposure fail closed; evidence
+    remains auditable.
+  verification: automated_or_reviewed
+  id: AC-01
+required_capabilities:
+- code_editing
+- structured_output
+- tool_use
+risk: high
+complexity: high
+recommended_executor: local-process executor
+recommended_model_profile: coding-reasoning
+validation:
+  gate: adversarial fixture suite passes.
+  completion_signal: boundary tests pass with zero known bypasses.
+autonomy:
+  mode: stage-gated
+expected_outputs:
+- security policy module and audit evidence.
+retry_budget:
+  task: 2
+  stage: 4
+  run: 1
+scope_description: policy enforcement and adversarial tests.
+non_goals:
+- provider-specific production integrations
+- distributed queues
+- UI
+- HR project changes
+allowed_changes:
+  paths:
+  - src/uads/security
+  - tests/security

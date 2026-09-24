@@ -1,0 +1,55 @@
+schema_version: '1.0'
+task_id: P01-S02-T02
+revision: 1
+title: Validate dependency graph and stage boundaries
+type: implementation
+objective: Validate unique IDs, acyclic dependencies, stage/phase references, and eligible-task closure.
+scope:
+  include:
+  - src/uads/plan
+  - tests/plan
+  exclude: []
+dependencies:
+- P01-S02-T01
+inputs:
+- SYSTEM_SPEC_V1_REV2.md
+- IMPLEMENTATION_PLAN.md
+- .uads/tasks/P01-S02-T01.yaml
+constraints:
+- Follow Revision 2 contracts and fail-closed validation.
+- Do not modify the HR project.
+- Do not start a later Phase before the current Stage gate passes.
+acceptance_criteria:
+- statement: cycles, missing dependencies, cross-project references, and invalid stage IDs are rejected
+    with actionable errors.
+  verification: automated_or_reviewed
+  id: AC-01
+required_capabilities:
+- code_editing
+- structured_output
+- tool_use
+risk: low
+complexity: low
+recommended_executor: local-process executor
+recommended_model_profile: coding-reasoning
+validation:
+  gate: graph tests include cycle, fan-in, fan-out, and empty-stage cases.
+  completion_signal: graph validator passes all fixtures.
+autonomy:
+  mode: stage-gated
+expected_outputs:
+- dependency graph and validation report.
+retry_budget:
+  task: 2
+  stage: 4
+  run: 1
+scope_description: graph validator and tests.
+non_goals:
+- provider-specific production integrations
+- distributed queues
+- UI
+- HR project changes
+allowed_changes:
+  paths:
+  - src/uads/plan
+  - tests/plan

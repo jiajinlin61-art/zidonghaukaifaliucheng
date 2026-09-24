@@ -1,0 +1,57 @@
+schema_version: '1.0'
+task_id: P06-S01-T01
+revision: 1
+title: Validate and persist worker results
+type: implementation
+objective: Parse `task_result_v1`, validate identity, status, changed paths, artifacts, and evidence.
+scope:
+  include:
+  - src/uads/results
+  - tests/results
+  exclude: []
+dependencies:
+- P05-S02-T01
+- P01-S01-T03
+inputs:
+- SYSTEM_SPEC_V1_REV2.md
+- IMPLEMENTATION_PLAN.md
+- .uads/tasks/P05-S02-T01.yaml
+- .uads/tasks/P01-S01-T03.yaml
+constraints:
+- Follow Revision 2 contracts and fail-closed validation.
+- Do not modify the HR project.
+- Do not start a later Phase before the current Stage gate passes.
+acceptance_criteria:
+- statement: malformed, missing, contradictory, or identity-mismatched output becomes `INVALID_WORKER_RESULT`
+    and `NEEDS_HUMAN`.
+  verification: automated_or_reviewed
+  id: AC-01
+required_capabilities:
+- code_editing
+- structured_output
+- tool_use
+risk: medium
+complexity: medium
+recommended_executor: local-process executor
+recommended_model_profile: coding-reasoning
+validation:
+  gate: result fixture matrix passes; raw output is retained.
+  completion_signal: valid/invalid result suite passes.
+autonomy:
+  mode: stage-gated
+expected_outputs:
+- parsed result and parser diagnostics.
+retry_budget:
+  task: 2
+  stage: 4
+  run: 1
+scope_description: parser, raw-result storage, schema tests.
+non_goals:
+- provider-specific production integrations
+- distributed queues
+- UI
+- HR project changes
+allowed_changes:
+  paths:
+  - src/uads/results
+  - tests/results

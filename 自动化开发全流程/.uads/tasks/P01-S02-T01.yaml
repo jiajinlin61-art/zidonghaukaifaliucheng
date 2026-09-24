@@ -1,0 +1,55 @@
+schema_version: '1.0'
+task_id: P01-S02-T01
+revision: 1
+title: Load plan and pinned definitions
+type: implementation
+objective: Load `.uads/plan.yaml` and its pinned definitions without using Markdown as an execution source.
+scope:
+  include:
+  - src/uads/plan
+  - tests/plan
+  exclude: []
+dependencies:
+- P01-S01-T01
+inputs:
+- SYSTEM_SPEC_V1_REV2.md
+- IMPLEMENTATION_PLAN.md
+- .uads/tasks/P01-S01-T01.yaml
+constraints:
+- Follow Revision 2 contracts and fail-closed validation.
+- Do not modify the HR project.
+- Do not start a later Phase before the current Stage gate passes.
+acceptance_criteria:
+- statement: missing, duplicate, revision-mismatched, objective-mismatched, and out-of-root definitions
+    fail closed.
+  verification: automated_or_reviewed
+  id: AC-01
+required_capabilities:
+- code_editing
+- structured_output
+- tool_use
+risk: low
+complexity: low
+recommended_executor: local-process executor
+recommended_model_profile: coding-reasoning
+validation:
+  gate: loader tests cover valid and malicious paths.
+  completion_signal: plan fixture suite passes.
+autonomy:
+  mode: stage-gated
+expected_outputs:
+- typed plan object and validation errors.
+retry_budget:
+  task: 2
+  stage: 4
+  run: 1
+scope_description: plan loader, path resolution, schema-version handling.
+non_goals:
+- provider-specific production integrations
+- distributed queues
+- UI
+- HR project changes
+allowed_changes:
+  paths:
+  - src/uads/plan
+  - tests/plan

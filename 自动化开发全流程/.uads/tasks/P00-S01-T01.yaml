@@ -1,0 +1,62 @@
+schema_version: '1.0'
+task_id: P00-S01-T01
+revision: 1
+title: Create reference implementation layout
+type: implementation
+objective: Create the minimum package, test, fixture, and `.uads/` layout for the local reference implementation.
+scope:
+  include:
+  - src
+  - tests
+  - .uads
+  - pyproject.toml
+  - docs
+  exclude: []
+dependencies:
+- P00-S01-T03
+inputs:
+- SYSTEM_SPEC_V1_REV2.md
+- IMPLEMENTATION_PLAN.md
+constraints:
+- Follow Revision 2 contracts and fail-closed validation.
+- Do not modify the HR project.
+- Do not start a later Phase before the current Stage gate passes.
+acceptance_criteria:
+- statement: package imports; test runner starts; required directories are explicit; no runtime behavior
+    is hidden in test fixtures.
+  verification: automated_or_reviewed
+  id: AC-01
+required_capabilities:
+- code_editing
+- structured_output
+- tool_use
+risk: low
+complexity: low
+recommended_executor: local-process executor
+recommended_model_profile: coding-reasoning
+validation:
+  gate: Non-empty unittest run and import smoke test; bootstrap plan validation is a separate seed check,
+    not runtime end-to-end evidence.
+  completion_signal: '`P00-S01-T01.completed` with command output and changed-path list.'
+autonomy:
+  mode: stage-gated
+expected_outputs:
+- repository skeleton; test command; documented supported Python version.
+retry_budget:
+  task: 2
+  stage: 4
+  run: 1
+scope_description: '`src/`, `tests/`, `.uads/`, `pyproject.toml`, development documentation; no provider
+  integration.'
+non_goals:
+- provider-specific production integrations
+- distributed queues
+- UI
+- HR project changes
+allowed_changes:
+  paths:
+  - src
+  - tests
+  - .uads
+  - pyproject.toml
+  - docs

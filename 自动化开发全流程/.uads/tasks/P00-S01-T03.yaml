@@ -1,0 +1,150 @@
+schema_version: '1.0'
+task_id: P00-S01-T03
+revision: 1
+title: Integrate product design lifecycle and review gates
+type: implementation
+objective: Integrate complexity-scaled product design artifacts and two FULL-mode
+  approval gates into the current workflow.
+scope:
+  include:
+  - ai-development-workflow-v1/DEVELOPMENT_WORKFLOW.md
+  - ai-development-workflow-v1/CODEX_MASTER_PROMPT.md
+  - ai-development-workflow-v1/PROJECT_EXECUTION_RULES.md
+  - ai-development-workflow-v1/WORKFLOW_MANIFEST.yaml
+  - ai-development-workflow-v1/README.md
+  - ai-development-workflow-v1/policies/DEVELOPMENT_MODES.md
+  - ai-development-workflow-v1/policies/PROJECT_START_GATE.md
+  - ai-development-workflow-v1/policies/QUALITY_GATES.md
+  - ai-development-workflow-v1/policies/HUMAN_APPROVAL.md
+  - ai-development-workflow-v1/policies/MODEL_ROUTING.md
+  - ai-development-workflow-v1/roles/REVIEWER.md
+  - ai-development-workflow-v1/templates/PROJECT_START_GATE.yaml
+  - ai-development-workflow-v1/templates/TECHNICAL_SELECTION.md
+  - ai-development-workflow-v1/templates/PROTOTYPE.md
+  - ai-development-workflow-v1/templates/PRD.md
+  - ai-development-workflow-v1/templates/ARCHITECTURE.md
+  - ai-development-workflow-v1/templates/IMPLEMENTATION_PLAN.md
+  - ai-development-workflow-v1/prompts/START_NEW_PROJECT.md
+  - ai-development-workflow-v1/starter-project/AGENTS.md
+  - tools/project_start_gate_validate.py
+  - tests/test_project_start_gate_validate.py
+  - .uads/plan.yaml
+  - .uads/tasks/P00-S01-T01.yaml
+  - .uads/tasks/P00-S01-T03.yaml
+  - .uads/approvals/P00-S01-T03.yaml
+  - .uads/requests/P00-S01-T03-r1.yaml
+  - .uads/results/P00-S01-T03-r1.yaml
+  - IMPLEMENTATION_PLAN.md
+  - PHASE_0_START.md
+  - docs/task-results/P00-S01-T03.md
+  - tests/test_bootstrap_validate.py
+  - docs/DEVELOPMENT.md
+  exclude:
+  - ai-development-workflow-v1/routing/MODEL_BINDINGS.yaml
+  - ai-development-workflow-v1/templates/EXECUTION_REQUEST.yaml
+  - ai-development-workflow-v1/templates/EXECUTION_RESULT.yaml
+  - src
+dependencies: []
+inputs:
+- ai-development-workflow-v1/DEVELOPMENT_WORKFLOW.md
+- ai-development-workflow-v1/policies/DEVELOPMENT_MODES.md
+- ai-development-workflow-v1/policies/PROJECT_START_GATE.md
+- ai-development-workflow-v1/policies/MODEL_ROUTING.md
+- ai-development-workflow-v1/templates/PROJECT_START_GATE.yaml
+- ai-development-workflow-v1/roles/REVIEWER.md
+- IMPLEMENTATION_PLAN.md
+- PHASE_0_START.md
+- docs/DEVELOPMENT.md
+constraints:
+- Keep execution in Phase 0; do not mark existing P00 tasks or Phase 0 complete.
+- FULL requires separate plan and design-baseline approvals before implementation;
+  STANDARD and FAST use one scaled plan approval.
+- Do not change physical model bindings or execution routing policy.
+- Do not add a permanent Reviewer agent; use the existing Reviewer role in an independent
+  session.
+- Do not add deployment or production acceptance steps.
+- Preserve current files and report no Git baseline; do not invent commit identifiers.
+acceptance_criteria:
+- statement: FAST, STANDARD, and FULL use the same execution core with mode-appropriate
+    design artifacts.
+  verification: automated_or_reviewed
+  id: AC-01
+- statement: FULL mode requires both plan and design-baseline approval before implementation;
+    the validator rejects an unapproved or incomplete design gate.
+  verification: automated
+  id: AC-02
+- statement: UI projects receive prototype and frontend/backend API-contract guidance;
+    projects without UI may mark prototype not applicable with a reason.
+  verification: automated_or_reviewed
+  id: AC-03
+- statement: independent review uses a separate session, selects the existing risk-appropriate
+    review profile, prefers another backend, and records the reason when falling back
+    to the same backend.
+  verification: automated_or_reviewed
+  id: AC-04
+- statement: existing GLM/GPT bindings and the Phase 0 only restriction remain unchanged.
+  verification: automated_or_reviewed
+required_capabilities:
+- code_editing
+- structured_output
+- tool_use
+risk: medium
+complexity: standard
+recommended_executor: claude-code
+recommended_model_profile: coding-standard
+validation:
+  gate: focused approval-gate tests, bootstrap plan validation, full non-empty test
+    suite, independent Review, and semantic consistency check.
+  completion_signal: '`P00-S01-T03.completed` with command output and changed-path
+    list.'
+autonomy:
+  mode: stage-gated
+expected_outputs:
+- complexity-scaled development lifecycle, updated templates and prompts, enforced
+  FULL design gate, and task evidence report.
+retry_budget:
+  task: 2
+  stage: 4
+  run: 1
+scope_description: Update the shared workflow package and its Project Start Gate validator/tests,
+  register this task as the first P00-S01 task, and preserve Phase 0 only.
+non_goals:
+- model binding or routing redesign
+- quota-state implementation
+- production deployment or launch acceptance
+- UADS Phase 1 or later implementation
+- HR project changes
+allowed_changes:
+  paths:
+  - ai-development-workflow-v1/DEVELOPMENT_WORKFLOW.md
+  - ai-development-workflow-v1/CODEX_MASTER_PROMPT.md
+  - ai-development-workflow-v1/PROJECT_EXECUTION_RULES.md
+  - ai-development-workflow-v1/WORKFLOW_MANIFEST.yaml
+  - ai-development-workflow-v1/README.md
+  - ai-development-workflow-v1/policies/DEVELOPMENT_MODES.md
+  - ai-development-workflow-v1/policies/PROJECT_START_GATE.md
+  - ai-development-workflow-v1/policies/QUALITY_GATES.md
+  - ai-development-workflow-v1/policies/HUMAN_APPROVAL.md
+  - ai-development-workflow-v1/policies/MODEL_ROUTING.md
+  - ai-development-workflow-v1/roles/REVIEWER.md
+  - ai-development-workflow-v1/templates/PROJECT_START_GATE.yaml
+  - ai-development-workflow-v1/templates/TECHNICAL_SELECTION.md
+  - ai-development-workflow-v1/templates/PROTOTYPE.md
+  - ai-development-workflow-v1/templates/PRD.md
+  - ai-development-workflow-v1/templates/ARCHITECTURE.md
+  - ai-development-workflow-v1/templates/IMPLEMENTATION_PLAN.md
+  - ai-development-workflow-v1/prompts/START_NEW_PROJECT.md
+  - ai-development-workflow-v1/starter-project/AGENTS.md
+  - tools/project_start_gate_validate.py
+  - tests/test_project_start_gate_validate.py
+  - .uads/plan.yaml
+  - .uads/tasks/P00-S01-T01.yaml
+  - .uads/tasks/P00-S01-T03.yaml
+  - .uads/approvals/P00-S01-T03.yaml
+  - .uads/requests/P00-S01-T03-r1.yaml
+  - .uads/results/P00-S01-T03-r1.yaml
+  - IMPLEMENTATION_PLAN.md
+  - PHASE_0_START.md
+  - docs/task-results/P00-S01-T03.md
+  - tests/test_bootstrap_validate.py
+  - docs/DEVELOPMENT.md

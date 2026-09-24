@@ -1,0 +1,56 @@
+schema_version: '1.0'
+task_id: P05-S02-T02
+revision: 1
+title: Implement leases, heartbeats, and timeouts
+type: implementation
+objective: Manage startup, idle, maximum, shutdown-grace, attempt leases, and interruption evidence.
+scope:
+  include:
+  - src/uads/supervisor
+  - tests/supervisor
+  exclude: []
+dependencies:
+- P05-S02-T01
+- P02-S02-T02
+inputs:
+- SYSTEM_SPEC_V1_REV2.md
+- IMPLEMENTATION_PLAN.md
+- .uads/tasks/P05-S02-T01.yaml
+- .uads/tasks/P02-S02-T02.yaml
+constraints:
+- Follow Revision 2 contracts and fail-closed validation.
+- Do not modify the HR project.
+- Do not start a later Phase before the current Stage gate passes.
+acceptance_criteria:
+- statement: monotonic time is used; stale work becomes `INTERRUPTED`; duplicate leases are rejected.
+  verification: automated_or_reviewed
+  id: AC-01
+required_capabilities:
+- code_editing
+- structured_output
+- tool_use
+risk: medium
+complexity: medium
+recommended_executor: local-process executor
+recommended_model_profile: coding-reasoning
+validation:
+  gate: fake-clock timeout and restart tests pass.
+  completion_signal: lifecycle matrix passes.
+autonomy:
+  mode: stage-gated
+expected_outputs:
+- supervisor lifecycle service and timeout evidence.
+retry_budget:
+  task: 2
+  stage: 4
+  run: 1
+scope_description: Execution Supervisor and lifecycle tests.
+non_goals:
+- provider-specific production integrations
+- distributed queues
+- UI
+- HR project changes
+allowed_changes:
+  paths:
+  - src/uads/supervisor
+  - tests/supervisor

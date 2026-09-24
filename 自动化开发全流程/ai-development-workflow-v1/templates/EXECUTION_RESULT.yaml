@@ -1,0 +1,79 @@
+schema_version: "1.3"
+task_id: P1-T01
+task_revision: 1
+attempt_id: P1-T01-r1-a1
+
+# Execution-layer status only. Never means project-level DONE.
+# READY_FOR_REVIEW / REVIEW_PASSED / FAILED / NEEDS_HUMAN
+status: READY_FOR_REVIEW
+
+workspace:
+  project_root: "<ABSOLUTE_PROJECT_PATH>"
+  baseline:
+    kind: git
+    ref: "<BASE_COMMIT>"
+
+delivery:
+  branch: "<TASK_BRANCH>"
+  commit: "<TASK_COMMIT>"
+  worktree: "<ABSOLUTE_WORKTREE_PATH>"
+  result_artifact: null
+
+worker:
+  status: COMPLETED
+  role: worker
+  profile: coding-standard
+  backend: claude-code
+  model: glm-5.2[1M]
+  effort: medium
+  execution_mode: delegated
+  override_reason: null
+  session: "<WORKER_SESSION_ID>"
+  invocation:
+    command: "<ACTUAL_WORKER_COMMAND>"
+    exit_code: 0
+    evidence: "<WORKER_SESSION_OR_OUTPUT_EVIDENCE>"
+
+changed_paths:
+  - src/example/main.py
+
+verification:
+  # Must exactly cover the request.validation.required_checks IDs.
+  mode: commands
+  result: PASS
+  checks:
+    - id: V1
+      kind: command
+      command: "<真实验证命令>"
+      exit_code: 0
+      evidence: "<关键输出摘要或证据位置>"
+
+failure:
+  fingerprint: null
+  category: null
+  same_fingerprint_failures: 0
+  error_code: null
+
+review:
+  status: PENDING
+  role: reviewer
+  profile: review-standard
+  reviewer_type: model
+  backend: null
+  model: null
+  effort: null
+  session: null
+  reviewer_id: null
+  review_revision: null
+  independence_evidence: null
+  invocation: null
+  evidence: []
+
+project_integration:
+  # Project Controller / Integrator owns this decision.
+  status: NOT_EVALUATED
+  main_ref: null
+  evidence: []
+
+remaining_risks: []
+handoff_notes: []

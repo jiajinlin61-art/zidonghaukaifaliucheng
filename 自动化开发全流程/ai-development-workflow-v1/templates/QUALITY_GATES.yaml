@@ -1,0 +1,3 @@
+task: [verification_commands, semantic_review, focused_diff]
+stage: [all_task_pass, integration_check, state_updated]
+phase: [acceptance_met, risks_handled, recovery_recorded]

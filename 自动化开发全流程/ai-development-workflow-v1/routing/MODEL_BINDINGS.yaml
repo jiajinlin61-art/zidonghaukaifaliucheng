@@ -1,0 +1,216 @@
+schema_version: "1.0"
+selection_policy: first_enabled_compatible
+verification_policy:
+  auto_select_statuses: [cli_probe_pass, product_controller]
+  max_probe_age_days: 14
+  revalidate_on:
+    - backend_version_change
+    - provider_endpoint_change
+    - credential_change
+    - model_id_change
+notes:
+  - "Profile 表示能力需求；candidate 才绑定具体 backend/model。"
+  - "verification=observed_local_config 表示已从本机非敏感配置确认存在绑定，不代表本轮已真实调用。"
+  - "verification=cli_observed 仅表示本机 CLI 默认配置已观察到该模型，不允许自动执行。"
+  - "verification=cli_probe_pass 表示已用本机 CLI 做过最小只读真实调用探测并通过。"
+  - "verification=not_locally_verified 表示保留为候选，首次自动执行前应做轻量探测或配置 fallback。"
+  - "backend.preflight 记录探测时 CLI 版本、已探测模型和非敏感配置指纹；不保存 Token/密码/私钥。"
+  - "route_preflight.py 只验证已有 probe 记录是否仍适配当前本机环境，不等价于新的远端模型调用。"
+
+backends:
+  controller:
+    type: external
+    description: "上层 ChatGPT Project Controller；不由本地 CLI 自动启动。"
+  codex:
+    type: cli
+    executable: codex
+    model_flag: --model
+    effort_mode: config
+    effort_key: model_reasoning_effort
+    non_interactive_subcommand: exec
+    preflight:
+      version_contains: "codex-cli 0.153.4"
+      config_fingerprint: "sha256:649e8c18bd76b5f9f64e627af7deb02461a37dea6b9606ba6f53d463a5d98df2"
+      verified_at: "2026-09-21"
+      probed_models:
+        - gpt-5.6-luna
+        - gpt-5.6-terra
+        - gpt-5.6-sol
+  claude-code:
+    type: cli
+    executable: claude
+    model_flag: --model
+    effort_flag: --effort
+    non_interactive_flag: --print
+    preflight:
+      version_contains: "2.1.278"
+      config_fingerprint: "sha256:56e4c6940dd042b2883f6fbaa1ef7b2b9421e771ea794a9101003f05aa52fea3"
+      verified_at: "2026-09-21"
+      probed_models:
+        - glm-5.1
+        - glm-5.2[1M]
+        - glm-5.3[1M]
+        - glm-5.3-flash[1M]
+
+profiles:
+  planning-deep:
+    role: planner
+    candidates:
+      - backend: controller
+        model: gpt-5.6-sol
+        effort: high
+        enabled: true
+        verification: product_controller
+
+  coding-economy:
+    role: worker
+    candidates:
+      - backend: claude-code
+        model: glm-5.1
+        effort: medium
+        enabled: true
+        verification: cli_probe_pass
+      - backend: codex
+        model: gpt-5.6-luna
+        effort: low
+        enabled: true
+        verification: cli_probe_pass
+
+  coding-fast:
+    role: worker
+    candidates:
+      - backend: claude-code
+        model: glm-5.3-flash[1M]
+        effort: medium
+        enabled: true
+        verification: cli_probe_pass
+      - backend: codex
+        model: gpt-5.6-luna
+        effort: medium
+        enabled: true
+        verification: cli_probe_pass
+
+  coding-standard:
+    role: worker
+    candidates:
+      - backend: claude-code
+        model: glm-5.2[1M]
+        effort: medium
+        enabled: true
+        verification: cli_probe_pass
+      - backend: codex
+        model: gpt-5.6-terra
+        effort: medium
+        enabled: true
+        verification: cli_probe_pass
+
+  coding-complex:
+    role: worker
+    candidates:
+      - backend: claude-code
+        model: glm-5.3[1M]
+        effort: high
+        enabled: true
+        verification: cli_probe_pass
+      - backend: codex
+        model: gpt-5.6-sol
+        effort: medium
+        enabled: true
+        verification: cli_probe_pass
+
+  coding-critical:
+    role: worker
+    candidates:
+      - backend: codex
+        model: gpt-5.6-sol
+        effort: high
+        enabled: true
+        verification: cli_probe_pass
+      - backend: claude-code
+        model: glm-5.3[1M]
+        effort: high
+        enabled: true
+        verification: cli_probe_pass
+
+  visual-coding:
+    role: worker
+    candidates:
+      - backend: claude-code
+        model: glm-5.3-flash[1M]
+        effort: high
+        enabled: true
+        verification: cli_probe_pass
+      - backend: claude-code
+        model: glm-5.3[1M]
+        effort: high
+        enabled: true
+        verification: cli_probe_pass
+
+  debug-standard:
+    role: debugger
+    candidates:
+      - backend: claude-code
+        model: glm-5.2[1M]
+        effort: high
+        enabled: true
+        verification: cli_probe_pass
+      - backend: codex
+        model: gpt-5.6-terra
+        effort: high
+        enabled: true
+        verification: cli_probe_pass
+
+  debug-deep:
+    role: debugger
+    candidates:
+      - backend: claude-code
+        model: glm-5.3[1M]
+        effort: high
+        enabled: true
+        verification: cli_probe_pass
+      - backend: codex
+        model: gpt-5.6-sol
+        effort: high
+        enabled: true
+        verification: cli_probe_pass
+
+  review-standard:
+    role: reviewer
+    candidates:
+      - backend: codex
+        model: gpt-5.6-terra
+        effort: high
+        enabled: true
+        verification: cli_probe_pass
+      - backend: claude-code
+        model: glm-5.3[1M]
+        effort: high
+        enabled: true
+        verification: cli_probe_pass
+
+  review-critical:
+    role: reviewer
+    candidates:
+      - backend: codex
+        model: gpt-5.6-sol
+        effort: high
+        enabled: true
+        verification: cli_probe_pass
+      - backend: claude-code
+        model: glm-5.3[1M]
+        effort: high
+        enabled: true
+        verification: cli_probe_pass
+
+escalation:
+  coding-economy: coding-standard
+  coding-fast: coding-standard
+  coding-standard: coding-complex
+  coding-complex: coding-critical
+  coding-critical: coding-critical
+  debug-standard: debug-deep
+  debug-deep: debug-deep
+
+review_policy:
+  prefer_different_backend_from_worker: true
+  critical_risks: [HIGH, CRITICAL]

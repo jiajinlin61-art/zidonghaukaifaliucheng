@@ -1,0 +1,570 @@
+schema_version: '1.0'
+project_id: uads-v1
+source_documents:
+  specification: SYSTEM_SPEC_V1_REV2.md
+  implementation_plan: IMPLEMENTATION_PLAN.md
+  conflict_policy: SYSTEM_SPEC_V1_REV2.md takes precedence
+default_branch: main
+execution_policy:
+  stage_gate: stop at the first failed Stage quality gate
+  phase_0_only_start: true
+  hr_project_modified: false
+phases:
+- id: P00
+  title: Foundation
+  stages:
+  - id: P00-S01
+    title: Repository and development contract
+    tasks:
+    - id: P00-S01-T03
+      title: Integrate product design lifecycle and review gates
+      revision: 1
+      definition: .uads/tasks/P00-S01-T03.yaml
+      priority: 990
+      dependencies: []
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Integrate complexity-scaled product design artifacts and two FULL-mode approval gates into the current workflow.
+    - id: P00-S01-T01
+      title: Create reference implementation layout
+      revision: 1
+      definition: .uads/tasks/P00-S01-T01.yaml
+      priority: 989
+      dependencies:
+      - P00-S01-T03
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Create the minimum package, test, fixture, and `.uads/` layout for
+        the local reference implementation.
+    - id: P00-S01-T02
+      title: Establish coding and evidence conventions
+      revision: 1
+      definition: .uads/tasks/P00-S01-T02.yaml
+      priority: 988
+      dependencies:
+      - P00-S01-T01
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Define the conventions used by later Tasks for schemas, errors, event
+        evidence, and test naming.
+  - id: P00-S02
+    title: Executable plan seed
+    tasks:
+    - id: P00-S02-T01
+      title: Define initial machine-readable plan
+      revision: 1
+      definition: .uads/tasks/P00-S02-T01.yaml
+      priority: 979
+      dependencies:
+      - P00-S01-T02
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Materialize this plan as `.uads/plan.yaml` with pinned Task Definition
+        paths and dependencies.
+- id: P01
+  title: Contracts and plan validation
+  stages:
+  - id: P01-S01
+    title: Canonical schemas
+    tasks:
+    - id: P01-S01-T01
+      title: Implement Task Definition schema
+      revision: 1
+      definition: .uads/tasks/P01-S01-T01.yaml
+      priority: 889
+      dependencies:
+      - P00-S02-T01
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Validate immutable Task Definitions, revisions, scope, dependencies,
+        acceptance criteria, and retry budgets.
+    - id: P01-S01-T02
+      title: Implement Runtime State and identity schemas
+      revision: 1
+      definition: .uads/tasks/P01-S01-T02.yaml
+      priority: 888
+      dependencies:
+      - P01-S01-T01
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Validate Runtime State, attempt identity, route identity, checkpoint/result
+        references, and task revision binding.
+    - id: P01-S01-T03
+      title: Implement event, result, decision, and manifest schemas
+      revision: 1
+      definition: .uads/tasks/P01-S01-T03.yaml
+      priority: 887
+      dependencies:
+      - P01-S01-T02
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Define validated records for events, worker results, HumanDecision,
+        checkpoints, and Run Manifest.
+  - id: P01-S02
+    title: Plan loader and validator
+    tasks:
+    - id: P01-S02-T01
+      title: Load plan and pinned definitions
+      revision: 1
+      definition: .uads/tasks/P01-S02-T01.yaml
+      priority: 879
+      dependencies:
+      - P01-S01-T01
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Load `.uads/plan.yaml` and its pinned definitions without using Markdown
+        as an execution source.
+    - id: P01-S02-T02
+      title: Validate dependency graph and stage boundaries
+      revision: 1
+      definition: .uads/tasks/P01-S02-T02.yaml
+      priority: 878
+      dependencies:
+      - P01-S02-T01
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Validate unique IDs, acyclic dependencies, stage/phase references,
+        and eligible-task closure.
+- id: P02
+  title: Durable state and transitions
+  stages:
+  - id: P02-S01
+    title: Event log and materialized state
+    tasks:
+    - id: P02-S01-T01
+      title: Implement append-only event store
+      revision: 1
+      definition: .uads/tasks/P02-S01-T01.yaml
+      priority: 789
+      dependencies:
+      - P01-S01-T03
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Append newline-terminated events with sequence continuity, payload
+        hashes, flush behavior, and final-line recovery rules.
+    - id: P02-S01-T02
+      title: Implement atomic state store and replay
+      revision: 1
+      definition: .uads/tasks/P02-S01-T02.yaml
+      priority: 788
+      dependencies:
+      - P02-S01-T01
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Materialize `state.json`, atomically replace it, and replay events
+        after `last_event_seq`.
+  - id: P02-S02
+    title: Transition engine
+    tasks:
+    - id: P02-S02-T01
+      title: Implement guarded state transitions
+      revision: 1
+      definition: .uads/tasks/P02-S02-T01.yaml
+      priority: 779
+      dependencies:
+      - P02-S01-T02
+      - P01-S01-T02
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Implement the Revision 2 transition table with owner, guard, and
+        required durable-data checks.
+    - id: P02-S02-T02
+      title: Add single-process serialization and idempotency
+      revision: 1
+      definition: .uads/tasks/P02-S02-T02.yaml
+      priority: 778
+      dependencies:
+      - P02-S02-T01
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Ensure concurrent or repeated transition requests cannot duplicate
+        attempts or event sequence numbers.
+- id: P03
+  title: Scheduling and human decisions
+  stages:
+  - id: P03-S01
+    title: Eligibility and retry policy
+    tasks:
+    - id: P03-S01-T01
+      title: Implement eligible-task scheduler
+      revision: 1
+      definition: .uads/tasks/P03-S01-T01.yaml
+      priority: 689
+      dependencies:
+      - P01-S02-T02
+      - P02-S02-T01
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Select the highest-priority eligible task from validated plan and
+        Runtime State.
+    - id: P03-S01-T02
+      title: Implement run/task/stage retry budgets
+      revision: 1
+      definition: .uads/tasks/P03-S01-T02.yaml
+      priority: 688
+      dependencies:
+      - P03-S01-T01
+      - P02-S02-T02
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Enforce independently scoped budgets and the narrowest-exhausted-budget
+        rule.
+  - id: P03-S02
+    title: Failure fingerprints and human flow
+    tasks:
+    - id: P03-S02-T01
+      title: Implement failure fingerprints
+      revision: 1
+      definition: .uads/tasks/P03-S02-T01.yaml
+      priority: 679
+      dependencies:
+      - P03-S01-T02
+      - P01-S01-T03
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Produce deterministic fingerprints from the specified identity, error,
+        verifier, artifact, and route inputs.
+    - id: P03-S02-T02
+      title: Implement HumanDecision requests and resolution
+      revision: 1
+      definition: .uads/tasks/P03-S02-T02.yaml
+      priority: 678
+      dependencies:
+      - P03-S02-T01
+      - P02-S02-T01
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Persist single-use decision requests and route approve, resolve,
+        retry, reject, and amend-definition actions.
+- id: P04
+  title: Context, checkpoints, and manifests
+  stages:
+  - id: P04-S01
+    title: Context Bundle
+    tasks:
+    - id: P04-S01-T01
+      title: Build bounded ordered context bundles
+      revision: 1
+      definition: .uads/tasks/P04-S01-T01.yaml
+      priority: 589
+      dependencies:
+      - P01-S01-T01
+      - P01-S02-T01
+      - P03-S02-T01
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Build task-relevant bundles from definition, plan, baseline, selected
+        files, failures, and instructions.
+    - id: P04-S01-T02
+      title: Implement reproducible bundle identity
+      revision: 1
+      definition: .uads/tasks/P04-S01-T02.yaml
+      priority: 588
+      dependencies:
+      - P04-S01-T01
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Hash canonical bundle metadata and content references exactly as
+        specified.
+  - id: P04-S02
+    title: Repository baseline and run binding
+    tasks:
+    - id: P04-S02-T01
+      title: Implement checkpoint capture and baseline policies
+      revision: 1
+      definition: .uads/tasks/P04-S02-T01.yaml
+      priority: 579
+      dependencies:
+      - P02-S01-T02
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Capture HEAD, dirty state, diff, untracked paths, and enforce allow-and-preserve,
+        require-clean, and allow-listed policies.
+    - id: P04-S02-T02
+      title: Implement immutable Run Manifest
+      revision: 1
+      definition: .uads/tasks/P04-S02-T02.yaml
+      priority: 578
+      dependencies:
+      - P04-S01-T02
+      - P04-S02-T01
+      - P01-S01-T03
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Bind plan, definition, route, context, checkpoint, configuration,
+        and budgets before execution.
+- id: P05
+  title: Routing and execution supervision
+  stages:
+  - id: P05-S01
+    title: Profiles, bindings, and route resolution
+    tasks:
+    - id: P05-S01-T01
+      title: Implement logical profiles and physical bindings
+      revision: 1
+      definition: .uads/tasks/P05-S01-T01.yaml
+      priority: 489
+      dependencies:
+      - P01-S01-T03
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Validate capability profiles and provider model bindings without
+        coupling Task Definitions to vendors.
+    - id: P05-S01-T02
+      title: Implement deterministic Route Resolver
+      revision: 1
+      definition: .uads/tasks/P05-S01-T02.yaml
+      priority: 488
+      dependencies:
+      - P05-S01-T01
+      - P04-S01-T02
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Select and validate the complete profile/binding/executor/provider/parser
+        tuple.
+  - id: P05-S02
+    title: Supervisor lifecycle
+    tasks:
+    - id: P05-S02-T01
+      title: Implement local executor protocol
+      revision: 1
+      definition: .uads/tasks/P05-S02-T01.yaml
+      priority: 479
+      dependencies:
+      - P04-S02-T02
+      - P05-S01-T02
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Define the minimal executor adapter that accepts a Context Bundle
+        and returns raw structured-result artifacts.
+    - id: P05-S02-T02
+      title: Implement leases, heartbeats, and timeouts
+      revision: 1
+      definition: .uads/tasks/P05-S02-T02.yaml
+      priority: 478
+      dependencies:
+      - P05-S02-T01
+      - P02-S02-T02
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Manage startup, idle, maximum, shutdown-grace, attempt leases, and
+        interruption evidence.
+- id: P06
+  title: Results and verification
+  stages:
+  - id: P06-S01
+    title: Result Parser
+    tasks:
+    - id: P06-S01-T01
+      title: Validate and persist worker results
+      revision: 1
+      definition: .uads/tasks/P06-S01-T01.yaml
+      priority: 389
+      dependencies:
+      - P05-S02-T01
+      - P01-S01-T03
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Parse `task_result_v1`, validate identity, status, changed paths,
+        artifacts, and evidence.
+  - id: P06-S02
+    title: Verification
+    tasks:
+    - id: P06-S02-T01
+      title: Implement deterministic acceptance checks
+      revision: 1
+      definition: .uads/tasks/P06-S02-T01.yaml
+      priority: 379
+      dependencies:
+      - P06-S01-T01
+      - P01-S01-T01
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Run and record schema, path, formatting, type, test, hash, dependency,
+        and policy checks selected by acceptance criteria.
+    - id: P06-S02-T02
+      title: Implement semantic verification and independent review
+      revision: 1
+      definition: .uads/tasks/P06-S02-T02.yaml
+      priority: 378
+      dependencies:
+      - P06-S02-T01
+      - P05-S01-T01
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Support declared evaluator/profile, cited artifacts, uncertainty,
+        reviewer independence, and disagreement escalation.
+- id: P07
+  title: Recovery, security, and end-to-end flow
+  stages:
+  - id: P07-S01
+    title: Startup reconciliation and recovery
+    tasks:
+    - id: P07-S01-T01
+      title: Reconcile interrupted attempts
+      revision: 1
+      definition: .uads/tasks/P07-S01-T01.yaml
+      priority: 289
+      dependencies:
+      - P05-S02-T02
+      - P06-S01-T01
+      - P02-S01-T02
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Recover `RUNNING`, `ROUTED`, `PARSING`, and `VERIFYING` attempts
+        using manifests, checkpoints, leases, and committed raw results.
+  - id: P07-S02
+    title: Security and audit
+    tasks:
+    - id: P07-S02-T01
+      title: Enforce path, command, and secret boundaries
+      revision: 1
+      definition: .uads/tasks/P07-S02-T01.yaml
+      priority: 279
+      dependencies:
+      - P04-S01-T01
+      - P04-S02-T01
+      - P05-S02-T01
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Apply trust-boundary rules to worker output, repository content,
+        external responses, paths, commands, and secrets.
+    - id: P07-S02-T02
+      title: Run the complete local reference flow
+      revision: 1
+      definition: .uads/tasks/P07-S02-T02.yaml
+      priority: 278
+      dependencies:
+      - P07-S01-T01
+      - P07-S02-T01
+      - P06-S02-T02
+      - P03-S02-T02
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Demonstrate plan validation through scheduling, routing, execution,
+        parsing, verification, persistence, and next-task selection.
+- id: P08
+  title: Hardening and V1 release gate
+  stages:
+  - id: P08-S01
+    title: Compatibility and operational hardening
+    tasks:
+    - id: P08-S01-T01
+      title: Test configuration precedence and provenance
+      revision: 1
+      definition: .uads/tasks/P08-S01-T01.yaml
+      priority: 189
+      dependencies:
+      - P05-S01-T02
+      - P04-S02-T02
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Implement and verify defaults through runtime overrides, including
+        non-weakenable safety rules.
+    - id: P08-S01-T02
+      title: Verify repeatability and failure diagnostics
+      revision: 1
+      definition: .uads/tasks/P08-S01-T02.yaml
+      priority: 188
+      dependencies:
+      - P07-S02-T02
+      - P08-S01-T01
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Exercise repeated runs, corrupted artifacts, partial writes, and
+        representative large plans within documented limits.
+  - id: P08-S02
+    title: Release baseline
+    tasks:
+    - id: P08-S02-T01
+      title: Complete implementation acceptance checklist
+      revision: 1
+      definition: .uads/tasks/P08-S02-T01.yaml
+      priority: 179
+      dependencies:
+      - P08-S01-T02
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Map every Revision 2 minimum acceptance criterion to code, test,
+        and evidence.
+    - id: P08-S02-T02
+      title: Freeze V1 technical baseline
+      revision: 1
+      definition: .uads/tasks/P08-S02-T02.yaml
+      priority: 178
+      dependencies:
+      - P08-S02-T01
+      retry_budget:
+        task: 2
+        stage: 4
+        run: 1
+      objective: Freeze schemas, transition semantics, artifact formats, and the reference-flow
+        evidence as the V1 baseline.

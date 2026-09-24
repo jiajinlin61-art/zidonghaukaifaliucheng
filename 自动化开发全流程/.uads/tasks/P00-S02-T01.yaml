@@ -1,0 +1,55 @@
+schema_version: '1.0'
+task_id: P00-S02-T01
+revision: 1
+title: Define initial machine-readable plan
+type: planning
+objective: Materialize this plan as `.uads/plan.yaml` with pinned Task Definition paths and dependencies.
+scope:
+  include:
+  - .uads/plan.yaml
+  - .uads/tasks
+  exclude: []
+dependencies:
+- P00-S01-T02
+inputs:
+- SYSTEM_SPEC_V1_REV2.md
+- IMPLEMENTATION_PLAN.md
+- .uads/tasks/P00-S01-T02.yaml
+constraints:
+- Follow Revision 2 contracts and fail-closed validation.
+- Do not modify the HR project.
+- Do not start a later Phase before the current Stage gate passes.
+acceptance_criteria:
+- statement: every listed Task has a unique ID, definition path, dependency list, and revision; the graph
+    is acyclic.
+  verification: automated_or_reviewed
+  id: AC-01
+required_capabilities:
+- code_editing
+- structured_output
+- tool_use
+risk: low
+complexity: low
+recommended_executor: local-process executor
+recommended_model_profile: coding-reasoning
+validation:
+  gate: a temporary structural checker proves ID uniqueness, path existence, and dependency closure.
+  completion_signal: plan hash recorded; structural checker passes.
+autonomy:
+  mode: stage-gated
+expected_outputs:
+- complete plan manifest and initial Task Definition files.
+retry_budget:
+  task: 2
+  stage: 4
+  run: 1
+scope_description: '`.uads/plan.yaml`, `tasks/*.yaml`; no scheduler implementation.'
+non_goals:
+- provider-specific production integrations
+- distributed queues
+- UI
+- HR project changes
+allowed_changes:
+  paths:
+  - .uads/plan.yaml
+  - .uads/tasks

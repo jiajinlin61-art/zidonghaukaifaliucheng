@@ -1,0 +1,59 @@
+schema_version: '1.0'
+task_id: P08-S02-T02
+revision: 1
+title: Freeze V1 technical baseline
+type: release
+objective: Freeze schemas, transition semantics, artifact formats, and the reference-flow evidence as
+  the V1 baseline.
+scope:
+  include:
+  - pyproject.toml
+  - src/uads/__init__.py
+  - docs/RELEASE.md
+  - .uads/releases
+  exclude: []
+dependencies:
+- P08-S02-T01
+inputs:
+- SYSTEM_SPEC_V1_REV2.md
+- IMPLEMENTATION_PLAN.md
+- .uads/tasks/P08-S02-T01.yaml
+constraints:
+- Follow Revision 2 contracts and fail-closed validation.
+- Do not modify the HR project.
+- Do not start a later Phase before the current Stage gate passes.
+acceptance_criteria:
+- statement: full test suite passes; plan and Task Definition hashes are recorded; known limitations and
+    deferred work are listed.
+  verification: automated_or_reviewed
+  id: AC-01
+required_capabilities:
+- code_editing
+- structured_output
+risk: high
+complexity: high
+recommended_executor: independent reviewer
+recommended_model_profile: coding-reasoning
+validation:
+  gate: clean release run from a fresh checkout or equivalent clean workspace.
+  completion_signal: '`V1_BASELINE_FROZEN` event plus archived evidence bundle.'
+autonomy:
+  mode: stage-gated
+expected_outputs:
+- V1 baseline report, hashes, and release notes.
+retry_budget:
+  task: 2
+  stage: 4
+  run: 1
+scope_description: version metadata, release documentation, final checks; no new features.
+non_goals:
+- provider-specific production integrations
+- distributed queues
+- UI
+- HR project changes
+allowed_changes:
+  paths:
+  - pyproject.toml
+  - src/uads/__init__.py
+  - docs/RELEASE.md
+  - .uads/releases

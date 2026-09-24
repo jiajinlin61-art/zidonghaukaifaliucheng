@@ -1,0 +1,55 @@
+schema_version: '1.0'
+task_id: P02-S01-T01
+revision: 1
+title: Implement append-only event store
+type: implementation
+objective: Append newline-terminated events with sequence continuity, payload hashes, flush behavior,
+  and final-line recovery rules.
+scope:
+  include:
+  - src/uads/state
+  - tests/state
+  exclude: []
+dependencies:
+- P01-S01-T03
+inputs:
+- SYSTEM_SPEC_V1_REV2.md
+- IMPLEMENTATION_PLAN.md
+- .uads/tasks/P01-S01-T03.yaml
+constraints:
+- Follow Revision 2 contracts and fail-closed validation.
+- Do not modify the HR project.
+- Do not start a later Phase before the current Stage gate passes.
+acceptance_criteria:
+- statement: sequence and hash violations fail closed; only a torn final non-newline line may be ignored.
+  verification: automated_or_reviewed
+  id: AC-01
+required_capabilities:
+- code_editing
+- structured_output
+- tool_use
+risk: medium
+complexity: medium
+recommended_executor: local-process executor
+recommended_model_profile: coding-reasoning
+validation:
+  gate: crash/corruption fixture tests pass.
+  completion_signal: append, replay, torn-line, and corruption tests pass.
+autonomy:
+  mode: stage-gated
+expected_outputs:
+- event store and integrity report.
+retry_budget:
+  task: 2
+  stage: 4
+  run: 1
+scope_description: '`.uads/events.jsonl` adapter and corruption tests.'
+non_goals:
+- provider-specific production integrations
+- distributed queues
+- UI
+- HR project changes
+allowed_changes:
+  paths:
+  - src/uads/state
+  - tests/state

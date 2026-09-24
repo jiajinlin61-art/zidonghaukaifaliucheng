@@ -1,0 +1,20 @@
+schema_version: "1.0"
+project_kind: new
+mode: UNDECIDED
+complexity: UNDECIDED
+risk: UNDECIDED
+cross_system: false
+architecture_change: false
+explicit_plan_approval_required: true
+
+plan_gate:
+  required: false
+  requirements_read: false
+  architecture_ready: false
+  development_plan_ready: false
+  user_approved: false
+  approval_ref: null
+
+implementation:
+  allowed: false
+  blocked_reason: "Project intake and gate assessment not completed"

@@ -1,0 +1,51 @@
+schema_version: "1.1"
+project_kind: new
+mode: FULL
+complexity: COMPLEX
+risk: HIGH
+cross_system: true
+architecture_change: true
+has_ui: true
+has_backend: true
+major_technical_change: false
+explicit_plan_approval_required: true
+
+# First hard approval (FULL): scope, initial technology selection, overall plan.
+plan_gate:
+  required: true
+  requirements_read: true
+  architecture_ready: true
+  development_plan_ready: true
+  user_approved: false
+  approval_ref: null
+
+# Second hard approval (FULL only): PRD / prototype / architecture baseline
+# before any feature code. Artifacts may be not_applicable only with a
+# non-empty reason; validator enforces which artifacts must be ready.
+design_gate:
+  required: true
+  artifacts:
+    technical_selection:
+      status: ready
+      reason: ""
+    prd:
+      status: ready
+      reason: ""
+    prototype:
+      status: ready
+      reason: ""
+    architecture:
+      status: ready
+      reason: ""
+    api_contract:
+      status: ready
+      reason: ""
+    implementation_plan:
+      status: ready
+      reason: ""
+  user_approved: false
+  approval_ref: null
+
+implementation:
+  allowed: false
+  blocked_reason: "Awaiting plan approval, then design-baseline approval"

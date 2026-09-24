@@ -1,0 +1,29 @@
+schema_version: "1.0"
+
+defaults:
+  planning: planning-deep
+  execution: coding-standard
+  debug: debug-standard
+  review: review-standard
+
+task_route:
+  complexity: STANDARD
+  risk: MEDIUM
+  task_kind: general
+  execution_profile: auto
+  execution_profile_override_reason: null
+  review_profile: auto
+  review_profile_override_reason: null
+
+# Environment-specific physical bindings live in:
+# ai-development-workflow-v1/routing/MODEL_BINDINGS.yaml
+fallback: compatible_verified_candidate_or_needs_human
+
+hard_gate:
+  resolved_execution_required: true
+  resolved_review_required: true
+  route_preflight_required: true
+  actual_worker_must_match_resolved_execution: true
+  controller_direct_execution_requires_explicit_override: true
+  independent_review_required: true
+  worker_and_model_review_invocation_evidence_required: true

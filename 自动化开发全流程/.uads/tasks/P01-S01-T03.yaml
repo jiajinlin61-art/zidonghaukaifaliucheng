@@ -1,0 +1,55 @@
+schema_version: '1.0'
+task_id: P01-S01-T03
+revision: 1
+title: Implement event, result, decision, and manifest schemas
+type: implementation
+objective: Define validated records for events, worker results, HumanDecision, checkpoints, and Run Manifest.
+scope:
+  include:
+  - src/uads/contracts
+  - tests/contracts
+  exclude: []
+dependencies:
+- P01-S01-T02
+inputs:
+- SYSTEM_SPEC_V1_REV2.md
+- IMPLEMENTATION_PLAN.md
+- .uads/tasks/P01-S01-T02.yaml
+constraints:
+- Follow Revision 2 contracts and fail-closed validation.
+- Do not modify the HR project.
+- Do not start a later Phase before the current Stage gate passes.
+acceptance_criteria:
+- statement: each record validates required identity, hashes, timestamps, and immutable fields; secrets
+    are rejected from manifest/event payloads.
+  verification: automated_or_reviewed
+  id: AC-01
+required_capabilities:
+- code_editing
+- structured_output
+- tool_use
+risk: low
+complexity: low
+recommended_executor: local-process executor
+recommended_model_profile: coding-reasoning
+validation:
+  gate: schema fixtures and secret-leak regression tests pass.
+  completion_signal: all record validators pass with zero known leaks.
+autonomy:
+  mode: stage-gated
+expected_outputs:
+- versioned record schemas and fixtures.
+retry_budget:
+  task: 2
+  stage: 4
+  run: 1
+scope_description: contract models and fixtures; no persistence logic.
+non_goals:
+- provider-specific production integrations
+- distributed queues
+- UI
+- HR project changes
+allowed_changes:
+  paths:
+  - src/uads/contracts
+  - tests/contracts

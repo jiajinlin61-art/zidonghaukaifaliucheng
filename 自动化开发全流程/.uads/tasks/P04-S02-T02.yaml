@@ -1,0 +1,59 @@
+schema_version: '1.0'
+task_id: P04-S02-T02
+revision: 1
+title: Implement immutable Run Manifest
+type: validation
+objective: Bind plan, definition, route, context, checkpoint, configuration, and budgets before execution.
+scope:
+  include:
+  - src/uads/checkpoints
+  - tests/checkpoints
+  exclude: []
+dependencies:
+- P04-S01-T02
+- P04-S02-T01
+- P01-S01-T03
+inputs:
+- SYSTEM_SPEC_V1_REV2.md
+- IMPLEMENTATION_PLAN.md
+- .uads/tasks/P04-S01-T02.yaml
+- .uads/tasks/P04-S02-T01.yaml
+- .uads/tasks/P01-S01-T03.yaml
+constraints:
+- Follow Revision 2 contracts and fail-closed validation.
+- Do not modify the HR project.
+- Do not start a later Phase before the current Stage gate passes.
+acceptance_criteria:
+- statement: manifest is immutable; hashes and identities match referenced artifacts; secrets are by name
+    only.
+  verification: automated_or_reviewed
+  id: AC-01
+required_capabilities:
+- code_editing
+- structured_output
+- tool_use
+risk: medium
+complexity: medium
+recommended_executor: local-process executor
+recommended_model_profile: coding-reasoning
+validation:
+  gate: manifest tamper and cross-reference tests pass.
+  completion_signal: manifest integrity suite passes.
+autonomy:
+  mode: stage-gated
+expected_outputs:
+- run-manifest adapter and verification report.
+retry_budget:
+  task: 2
+  stage: 4
+  run: 1
+scope_description: manifest creation/validation and tests.
+non_goals:
+- provider-specific production integrations
+- distributed queues
+- UI
+- HR project changes
+allowed_changes:
+  paths:
+  - src/uads/checkpoints
+  - tests/checkpoints

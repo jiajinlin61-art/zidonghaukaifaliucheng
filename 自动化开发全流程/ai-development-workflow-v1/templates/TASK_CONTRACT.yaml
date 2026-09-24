@@ -1,0 +1,11 @@
+id: TASK-000
+objective: ""
+scope: []
+out_of_scope: []
+inputs: []
+outputs: []
+verification:
+  commands: []
+  semantic_checks: []
+risks: []
+stop_conditions: []

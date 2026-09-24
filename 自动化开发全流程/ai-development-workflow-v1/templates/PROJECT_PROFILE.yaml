@@ -1,0 +1,5 @@
+workflow_version: V1
+mode: STANDARD
+complexity: STANDARD
+master_executor: Codex
+worker_executors: [Claude_Code]

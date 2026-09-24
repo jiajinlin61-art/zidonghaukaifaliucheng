@@ -1,0 +1,20 @@
+schema_version: "1.0"
+project_kind: existing
+mode: STANDARD
+complexity: STANDARD
+risk: MEDIUM
+cross_system: false
+architecture_change: false
+explicit_plan_approval_required: true
+
+plan_gate:
+  required: true
+  requirements_read: true
+  architecture_ready: true
+  development_plan_ready: true
+  user_approved: true
+  approval_ref: 'user-message: "把流程改造加入当前计划，现在做"'
+
+implementation:
+  allowed: true
+  blocked_reason: ""
