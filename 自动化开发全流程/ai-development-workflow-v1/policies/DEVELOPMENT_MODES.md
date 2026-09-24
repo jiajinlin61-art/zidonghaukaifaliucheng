@@ -34,4 +34,4 @@ STANDARD 和 FAST 只使用一次适当缩短的计划审批。机器校验见 `
 
 ## 边界
 
-本流程止于开发验证、独立 Review 与集成；不包含部署或生产验收。测试成本与任务成比例（见 `DEVELOPMENT_WORKFLOW.md` 的 Execution clarifications）。
+本流程止于开发验证、独立 Review 与集成；不包含部署或生产验收。测试成本与任务成比例，具体执行与证据要求见 `QUALITY_GATES.md`。

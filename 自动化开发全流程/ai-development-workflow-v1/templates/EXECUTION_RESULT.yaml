@@ -1,4 +1,4 @@
-schema_version: "1.3"
+schema_version: "1.4"
 task_id: P1-T01
 task_revision: 1
 attempt_id: P1-T01-r1-a1
@@ -18,6 +18,7 @@ delivery:
   commit: "<TASK_COMMIT>"
   worktree: "<ABSOLUTE_WORKTREE_PATH>"
   result_artifact: null
+  content_sha256: "<CAPTURED_DELIVERY_CONTENT_SHA256>"
 
 worker:
   status: COMPLETED
@@ -33,6 +34,7 @@ worker:
     command: "<ACTUAL_WORKER_COMMAND>"
     exit_code: 0
     evidence: "<WORKER_SESSION_OR_OUTPUT_EVIDENCE>"
+    receipt: worker.json
 
 changed_paths:
   - src/example/main.py
@@ -47,6 +49,7 @@ verification:
       command: "<真实验证命令>"
       exit_code: 0
       evidence: "<关键输出摘要或证据位置>"
+      receipt: check-V1.json
 
 failure:
   fingerprint: null
@@ -65,6 +68,10 @@ review:
   session: null
   reviewer_id: null
   review_revision: null
+  reviewed_content_sha256: null
+  reviewed_commit: null
+  # Human/semantic report: {path, sha256, content_sha256}; never fabricate invocation.
+  report: null
   independence_evidence: null
   invocation: null
   evidence: []

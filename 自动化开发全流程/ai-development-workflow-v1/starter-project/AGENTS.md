@@ -1,26 +1,30 @@
-# Project Rules — Workflow V1（2026-09-18 规范修订）
+# 项目入口规则
 
-本文件包含新项目所需的最小规则，可独立于外部工作流包使用。用户当前明确指令优先；保留适用的项目约束。仅复制本目录时执行下述轻量流程；项目明确启用完整规则包时，再执行其中的路由、预检与 Execution Contract 1.3。
+模板版本：2026-09-24。此 starter 独立可用；以下共享设置预置为待接入，首次核验并明确启用后才使用完整规则包。
 
-- 先读取 Brief/需求文档、`.ai-dev/PROJECT_START_GATE.yaml`、当前状态、计划、相关代码和已有改动。低风险单点工作用 FAST；常规跨文件用 STANDARD；跨系统或高风险用 FULL。STANDARD 默认使用简明 Scope/Spec + Task Contract；只有多组依赖、跨模块集成、长周期交付或明确阶段 Gate 才展开 Phase/Stage。FULL 使用 Phase → Stage → Task。
-- 新项目命中 FULL、COMPLEX/CRITICAL、HIGH/CRITICAL risk、跨系统、架构变更或用户明确要求先确认计划时，必须先完整读取需求、形成架构和开发计划并展示给用户；用户明确确认并记录 approval_ref 前，`implementation.allowed=false`，禁止进入业务代码 Implementation。
-- 每个 Task 写清 ID、目标、允许修改的范围、输入、验收命令、非目标和停止条件。输入与路径边界必须验证，不能吞掉错误或以简化为由省略必要的安全措施。
-- 已授权且范围明确的工作自动继续。Task/Stage/Phase Gate 是质量检查，不是重复许可；明确人工检查点必须停。尚未授权的破坏性操作、外部发送/发布、付费、权限或凭据变更，以及无法推断的业务取舍，先给出具体影响再询问；不重复索要已有授权。
-- 修改后检查差异，执行项目现有验证并核对需求、边界和回归。零测试不等于通过；纯文档任务可记录适当的替代核验。独立 Review 由另一个审查过程或人完成，作者的成功声明不作为证据；不得虚报测试或审查。
-- Stage 检查所有 Task 和集成路径，Phase 检查阶段目标与用户验收条件；FAST 可以合并 Gate。失败时在授权内修复，未通过不得进入依赖它的工作；遇范围变化或显式停止条件再暂停。
-- 失败记录稳定 fingerprint（task revision、error code、归一化错误、失败命令/接口）；model、backend、session、commit 属于 attempt context，不进入 fingerprint。默认最多 2 次 retry，即首次执行 + 2 次重试；第 1 次 retry 保持当前 Profile，同一 fingerprint 再失败后第 2 次 retry 才升级。没有新证据、预算耗尽或出现数据损失风险时停止并报告，换会话/模型/Executor 不能重置计数。
-- 保护用户已有修改，不擅自回滚或清理。记录 Git HEAD 和 dirty state；没有 Git 时明确写“无 Git 基线”，改用文件差异，不编造提交号。
-- standalone_master 模式下，在验收、关键决定、阻塞变化或中断时更新 `.ai-dev/CURRENT_STATE.md` 和 `.ai-dev/CHECKPOINT.md`。如果项目由外部 TaskBoard 作为 Project Controller，`.ai-dev` 只记录当前执行 attempt、证据和恢复线索，不维护第二份项目 NEXT/Roadmap/DONE。恢复时核对当前文件、Git 和证据；重启不清除人工阻塞，旧会话不是事实来源。
-- 仅使用本 starter 时，按任务难度和用户指定选择当前可用模型，记录实际执行者、验证结果和审查证据；不得声称运行了未复制的 Router、route_preflight 或 Execution Contract 校验。需要严格的模型路由与机器门禁时，先明确启用完整规则包，核对工具、模型绑定和可执行环境，再按其规则执行。
-- 独立 Review 由不同会话或人完成，保留审查结论与依据。使用完整规则包时，Reviewer 还须符合 resolved_review，Controller/Worker 的职责边界以该包的 Execution Request 为准。无法满足所选模式的必需门禁时说明原因并停止相关执行，不静默降级。用户明确指定的模型优先。
+- 每个任务先读本文件、当前需求/Task 和直接相关源码/测试；不默认加载全部 docs、模板、历史日志。需补充上下文时查 [.ai-dev/CONTEXT_INDEX.md](.ai-dev/CONTEXT_INDEX.md)，只读命中项。
+- 新功能或实质范围变化先展示相称计划并取得明确确认，包括 FAST；FULL 再确认 PRD/适用原型/架构/API/阶段计划的设计基线。已有批准范围连续推进，不按 Task 重复确认。
+- 复用已有需求、技术栈、原型和架构，仅补缺失/过期部分。FAST 为单点低风险；STANDARD 默认少量 Task；FULL 或确有复杂依赖才展开 Phase/Stage。
+- 当前 Task 明确目标、非目标、允许路径、验收和停止条件；修改前核对已有改动，不覆盖用户工作或扩大范围。
+- 每个连贯变更运行相关检查，失败后复验失败项和受影响路径；集成时执行全量与真实用户路径。零测试、模板通过、作者声明不等于业务完成。
+- 独立 Review 由不同会话或人完成，核对实际 diff/证据并绑定交付版本；交付变化后重新审查。不能满足门禁时说明并停止依赖工作，不虚报或静默降级。
+- 仅使用 starter 时选择当前实际可用的执行者，不宣称运行了未复制的路由或证据工具。完整包启用后按其版本执行，不复制一份完整策略进本文件。
+- 失败保存稳定 fingerprint、次数和 attempt；默认首次执行加最多两次重试，换会话/模型不能重置。第 1 次重试依据新证据修复；同指纹再次失败后第 2 次才升级。无新证据或预算耗尽停止报告。
+- 记录真实 Git HEAD/dirty state；无 Git 则记录文件基线。关键进展、阻塞变化或中断更新 CURRENT_STATE/CHECKPOINT；日常小改动不反复重写两份状态。
+- 外部 TaskBoard 存在时由它拥有 NEXT/Roadmap/DONE，.ai-dev 仅保存执行与恢复信息；独立项目由当前主控拥有项目状态。
+- 多任务集成时对照全部已批准需求，确认每项有任务覆盖及实际验证，不能仅累加各 Task 的通过结论。
+- 只在有实际帮助时加载技能；显式调用优先，Ponytail 仅显式调用。新建前后端项目使用 frontend/、backend/ 分离目录并明确 API 契约；已有项目遵循已批准的目录/API 边界，已有项目不因模板自动搬迁。
+- Stage/Phase 记录有用经验；FAST 只有可复用经验才在结果写一句，不新建独立回顾。交接引用目标、边界、当前工作区、验证和失败历史及下一动作，不复制全部日志。
+- 未授权的破坏性、对外发送/发布、付费、权限/凭据变更及无法推断的业务取舍需用户决定；明确人工检查点保留，已有批准不重复索取。
 
+## 共享流程接入（首次核验后更新本节）
 
-## Additional project workflow rules
-
-- Before implementing any new functional request or material scope change, show a task-sized plan, set explicit_plan_approval_required=true, and wait for explicit user approval, including FAST work. Once approved, proceed through that scope without repeated permission requests.
-- Keep the user's approved goal, non-goals, and acceptance criteria in Task Contracts; check alignment at Task start and each Stage/Phase Gate. Pause implementation if it begins to redirect the intended outcome.
-- Test each coherent Task/change set with the smallest relevant checks. After a failure, rerun the failed check and affected regressions; run the full suite and end-to-end flow at integration/release Gates.
-- At intake, use a skill only when it directly helps the task or the user requests it; record any invoked skill. Run Ponytail review only when the user explicitly requests it.
-- At Stage/Phase Gates and standalone task completion, write a concise retrospective linked to request/result/review evidence.
-- Agent handoffs include approved goal/scope, Task Contract, allowed paths, architecture decisions, current workspace state, checks, retry/failure history, and next action. Verify the live workspace on receipt.
-- Projects with UI and server code use separate `frontend/` and `backend/` roots, with an explicit API contract and separate run/build checks.
+- 状态：待接入；共享根：`E:\自动化开发任务通用流程\自动化开发全流程`；规则包：该目录下 `ai-development-workflow-v1`。
+- 版本基线：待核验；启用时记录 Manifest 版本、契约版本、Git HEAD 与 dirty 状态，不能把未提交内容当成 HEAD 已发布版本。
+- 权限核验：待核验；项目专属证据目录：待确定。证据必须在代码工作区外、共享库外，按项目/task/attempt 隔离。
+- 首次接入读规则包 `PROJECT_EXECUTION_RULES.md`、`policies/CONTEXT_POLICY.md` 和 `policies/SHARED_LIBRARY_USAGE.md`；后续只按需读对应条目。
+- 共享库只读；代码、计划、状态和结果写本项目，原始证据写本项目专属外置目录；不跨项目复用状态或证据，不向共享库提权写入、安装依赖或更新模型配置。
+- 运行共享工具前核对实际参数和解析后的绝对路径（包括链接目标）；cwd 为业务工作区，输出不可指向共享库或其他项目。Python 禁写共享字节码缓存；子进程权限与缓存另行核对。
+- 业务环境仅开放当前工作区及本项目专属证据目录的必要写权限；共享库不得加入可写范围。无法确认硬隔离时标记“仅规则约束”，不得宣称权限已生效。
+- 接入、新会话及首次加载相关文件时核对版本；未提交库对实际使用文件保存 SHA-256 基线到本项目既有记录。相关文件变化先评估，低影响修订直接更新记录，审批/费用/执行/验收变化按影响确认；不静默更新或降级。
+- 维护共享流程需另开共享库工作目录并取得对应修改授权；业务任务的改进建议先记本项目。路径不可读或能力缺失时报告，停止依赖步骤；版本记录不等于冻结旧版。

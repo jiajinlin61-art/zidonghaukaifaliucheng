@@ -125,7 +125,7 @@ Model Routing 是执行门禁，不是建议。每个实现 Task 在启动 Worke
 1. 调用 model_router.py 得到确定性 execution route；
 2. 基于 Worker backend 再解析 review route；
 3. 分别运行 route_preflight.py；
-4. 将两个 resolved route 及 preflight command / exit_code / evidence 写入 Execution Request 1.3；
+4. 将两个 resolved route 及 preflight command / exit_code / evidence 写入 Execution Request 1.4；
 5. 使用 execution_contract_validate.py actual 模式通过契约校验后，才能启动 Worker。
 
 delegated Worker 的实际 profile/backend/model/effort 必须和 resolved_execution 完全一致，并记录独立 session 与真实 invocation evidence。只在文档里声称“用了 GLM/GPT”但没有实际调用证据，视为 Route Gate FAIL。

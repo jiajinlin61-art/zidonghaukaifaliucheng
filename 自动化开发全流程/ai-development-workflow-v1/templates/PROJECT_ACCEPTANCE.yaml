@@ -1,0 +1,18 @@
+# Create only at multi-task planning/integration. FAST reuses its Task acceptance.
+approval_ref: "<APPROVED_SCOPE_REFERENCE>"
+workspace: "<INTEGRATED_PROJECT_ROOT>"
+integration_identity:
+  task_id: project-acceptance
+  task_revision: 1
+  attempt_id: project-acceptance-r1-a1
+requirements:
+  - id: R1
+    criterion: "<observable approved user outcome>"
+tasks:
+  - id: P1-T01
+    requirement_ids: [R1]
+checks:
+  - id: I1
+    requirement_ids: [R1]
+    command: "<exact command from approved integration check receipt>"
+    receipt: integration-I1.json

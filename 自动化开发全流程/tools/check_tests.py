@@ -12,6 +12,8 @@ def main() -> int:
     parser.add_argument("start", nargs="?", default="tests")
     args = parser.parse_args()
     sys.path.insert(0, str(Path.cwd()))
+    # Source checkout is authoritative, including after a directory move.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
     suite = unittest.defaultTestLoader.discover(args.start, pattern="test*.py")
     count = suite.countTestCases()
     if count == 0:

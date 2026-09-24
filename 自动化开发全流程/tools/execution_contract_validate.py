@@ -4,8 +4,8 @@ Template mode validates reusable contract shape and allows placeholders.
 Actual mode rejects placeholders and enforces evidence, scope, identity, validation
 coverage, reviewer independence, and failure semantics.
 
-This validator does not execute commands, inspect Git objects, or decide project-level
-DONE. Integrators must still verify the real diff/commit and rerun required checks.
+The actual CLI gate verifies captured files and Git/content identity; it does not
+execute commands or decide project-level DONE. In-memory functions validate shape.
 """
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ from fnmatch import fnmatchcase
 from pathlib import Path, PureWindowsPath
 import re
 import sys
+import subprocess
 from typing import Any
 
 import yaml
@@ -24,7 +25,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from tools.model_router import resolve_route
 
-SCHEMA_VERSION = "1.3"
+SCHEMA_VERSION = "1.4"
 REQUEST_PURPOSES = {"execute"}
 RESULT_STATUSES = {"READY_FOR_REVIEW", "REVIEW_PASSED", "FAILED", "NEEDS_HUMAN"}
 WORKER_STATUSES = {"COMPLETED", "FAILED", "NEEDS_HUMAN"}
@@ -479,6 +480,8 @@ def validate_result(doc: dict[str, Any], *, template_mode: bool = False) -> None
     if worker_status == "COMPLETED":
         nonempty_string(worker.get("session"), "result.worker.session")
         validate_invocation(worker.get("invocation"), "result.worker.invocation", required=True)
+        if worker['invocation']['exit_code'] != 0:
+            fail('worker COMPLETED requires invocation exit_code 0')
 
     validate_repo_relative_paths(doc.get("changed_paths"), "result.changed_paths")
 
@@ -541,6 +544,9 @@ def validate_result(doc: dict[str, Any], *, template_mode: bool = False) -> None
         if not evidence:
             fail("result.review.evidence: completed review requires evidence")
         validate_review_independence(review, worker)
+        if review_status == 'PASS' and review.get('reviewer_type') == 'model':
+            if review['invocation']['exit_code'] != 0:
+                fail('review PASS requires invocation exit_code 0')
         if review_status in {"FAIL", "NEEDS_HUMAN"}:
             failure_signal = True
 
@@ -663,6 +669,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--request", type=Path)
     parser.add_argument("--result", type=Path)
+    parser.add_argument('--evidence-root', type=Path,
+                        help='Required for actual successful result validation; outside worktree')
     parser.add_argument(
         "--mode",
         choices=["actual", "template"],
@@ -683,7 +691,12 @@ def main() -> int:
             validate_result(result, template_mode=template_mode)
         if request is not None and result is not None:
             validate_pair(request, result)
-    except (OSError, ValueError, yaml.YAMLError) as error:
+        if not template_mode and result is not None and result['status'] in {'READY_FOR_REVIEW', 'REVIEW_PASSED'}:
+            if request is None or args.evidence_root is None:
+                fail('Actual successful results require --request and --evidence-root')
+            from tools.delivery_evidence import validate_delivery
+            validate_delivery(request, result, args.evidence_root)
+    except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError, yaml.YAMLError) as error:
         print(f"execution contract validation failed: {error}", file=sys.stderr)
         return 1
 

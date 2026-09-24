@@ -12,7 +12,7 @@ from tools.execution_contract_validate import (
 
 def valid_request():
     return {
-        "schema_version": "1.3",
+        "schema_version": "1.4",
         "task_id": "P1-T01",
         "task_revision": 1,
         "attempt_id": "P1-T01-r1-a1",
@@ -112,7 +112,7 @@ def valid_request():
 
 def valid_result():
     return {
-        "schema_version": "1.3",
+        "schema_version": "1.4",
         "task_id": "P1-T01",
         "task_revision": 1,
         "attempt_id": "P1-T01-r1-a1",

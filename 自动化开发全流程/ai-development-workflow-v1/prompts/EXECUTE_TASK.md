@@ -1,12 +1,9 @@
-只执行当前 Task Contract 的范围。
+只执行当前 Task Contract。日常只读本提示、当前契约及相关实现；首次使用证据工具时读 policies/DELIVERY_EVIDENCE.md。
 
-1. 读取 Task Contract、PROJECT_START_GATE 引用、相关代码、测试和已有改动；确认 task_id、task_revision、attempt_id、workspace baseline。
-2. 以 actual 模式校验 Execution Request 1.3。project_start_gate.status 必须是 APPROVED 或 NOT_REQUIRED；Request 必须包含完整 resolved_execution / resolved_review 和 route_preflight 证据。
-3. 不要重新自由选择模型。使用 Request.resolved_execution 指定的 profile/backend/model/effort 启动独立 Worker Session；若真实 route 与 Request 不一致，停止并返回契约错误。
-4. Controller 默认不得直接实现当前 Task。只有 Request.governance.controller_worker_override.allowed=true 时才允许 controller_override，并必须使用完全一致的 override reason。
-5. 只在 Allowed Paths 内实现，不修改项目级 NEXT/Roadmap。修改后检查真实 diff。
-6. 逐个执行 Request.required_checks，以相同 check ID 返回 command/exit code 或 semantic conclusion 与 evidence。
-7. Worker Result 必须记录 execution_mode、实际 profile/backend/model/effort、session，以及 invocation.command / exit_code / evidence。没有真实 invocation evidence 不能声明 READY_FOR_REVIEW。
-8. 失败记录稳定 failure fingerprint 与 attempt context；第 1 次 retry 保持 Profile，同一 fingerprint 第二次失败后第 2 次 retry 才 escalation。
-9. Worker 完成且验证通过时，Execution Result 只能是 READY_FOR_REVIEW；project_integration 保持 NOT_EVALUATED。
-10. 返回前运行 execution_contract_validate.py 校验 request/result identity、resolved route、scope、验证证据和状态一致性。
+1. 核对 task/revision/attempt、批准范围、基线、现有改动；用 actual 校验 Request 1.4。resolved routes 和预检必须有效。
+2. 使用 resolved_execution 的实际执行者启动独立 Worker；Controller override 必须由 Request 明确允许。不自行换模型或扩大任务。
+3. 用 delivery_evidence.py 包装真实 Worker 命令，证据存工作区外；工具记录任务前后内容。保持唯一 receipt 名称，失败修复使用新 attempt 或新记录，不覆盖旧证据。
+4. 用同一工具执行每个 required command check（kind=check:ID）。校验命令不得改变交付源码；语义检查保存具体报告和内容摘要。按命令摘要自动填 Result，不复制日志。
+5. Worker 成功且验证通过才返回 READY_FOR_REVIEW；声明的 changed_paths 必须与采集差异完全一致，审查/验证绑定 delivery.content_sha256。
+6. 返回前运行 execution_contract_validate.py --request REQUEST --result RESULT --evidence-root EVIDENCE_DIR。actual 是默认模式；template 不能用来批准实际结果。
+7. 失败才读取重试策略，保留指纹/计数；不更新项目 NEXT/DONE。集成由 Controller 完成。

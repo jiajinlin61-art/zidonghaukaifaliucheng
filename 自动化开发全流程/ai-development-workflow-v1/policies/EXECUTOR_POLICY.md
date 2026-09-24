@@ -7,7 +7,7 @@ Project Controller 默认承担项目级目标、架构、计划、路由、验�
 Controller 不得因为“自己也能写代码”而跳过 Model Router 直接实现 routed Worker task。每个实现 Task 在进入 Worker 前必须：
 
 1. 具有通过 Project Start Gate 的治理引用（APPROVED 或 NOT_REQUIRED）；
-2. 生成 Execution Request 1.3；
+2. 生成 Execution Request 1.4；
 3. 运行 model_router；
 4. 运行 route_preflight；
 5. 把 resolved_execution / resolved_review 和 preflight 证据写入 Request。

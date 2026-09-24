@@ -1,14 +1,9 @@
-以独立 Reviewer Session 审查当前 Task。
+使用独立 Reviewer 会话审查当前 Task；只读 Request、Result、实际 diff 和必要验证摘要，不读取全项目历史。
 
-读取 Execution Request 1.3、Worker Execution Result、真实 diff、task revision / attempt identity 和验证输出。先确认 Worker Result 为 READY_FOR_REVIEW 且契约校验通过。
+先运行 actual 契约与磁盘证据门禁，要求 Worker 为 READY_FOR_REVIEW。模型 Reviewer 必须与 resolved_review 一致且不同于 Worker 会话；用 delivery_evidence.py 包装审查命令（kind=review），保持交付文件不变。人工审查保存真实报告及 reviewer_id，不伪造进程记录。
 
-必须使用 Request.resolved_review 指定的 profile/backend/model/effort，不得自行降级或复用 Worker Session。模型 Reviewer 的 session 必须与 Worker session 不同；Reviewer invocation 必须记录 command、exit_code 和 evidence。人工 Reviewer 则记录稳定 reviewer_id 和独立审查证据。
+核对目标、允许路径、错误处理、兼容性和真实用户行为。需要时独立复验相关检查。每次审查绑定 task/attempt、delivery.content_sha256 和 Git 完整提交号；审查后交付发生变化则重新审查。
 
-检查真实 diff 是否与 Worker changed_paths 一致、是否全部在 Request scope 内、每个 required check 是否有对应证据，以及 Acceptance、错误处理、兼容性、数据安全、幂等性和回归风险。不得只相信 Worker 的文本结论；必要命令应独立复验。
+把 reviewed_content_sha256、reviewed_commit 和 invocation.receipt 写入 review；真实退出成功且结论 PASS 才返回 REVIEW_PASSED。FAIL 返回修复证据，需用户决定则 NEEDS_HUMAN。review_revision 表示审查轮次，不是 task_revision 的替代物。
 
-输出后更新 Execution Result：
-- PASS → status=REVIEW_PASSED，review.status=PASS；
-- FAIL → status=FAILED，review.status=FAIL，并附 required fixes；
-- 需要人工判断 → status=NEEDS_HUMAN。
-
-project_integration.status 保持 NOT_EVALUATED。Reviewer 不声明项目级 DONE，也不实现新的业务范围。返回前再次运行 execution_contract_validate.py，确保 Reviewer route 与 resolved_review 一致且独立性证据有效。
+再次运行 execution_contract_validate.py --request REQUEST --result RESULT --evidence-root EVIDENCE_DIR。project_integration 保持 NOT_EVALUATED；Reviewer 不声明项目 DONE。详细字段仅首次接入时读 policies/DELIVERY_EVIDENCE.md。

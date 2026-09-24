@@ -1,21 +1,17 @@
-# Quality Gates
+# 质量门禁（验收时读取）
 
-验证分两类：命令型（test/lint/typecheck/build/安全检查）和语义型（需求、边界、错误处理、兼容性、可维护性）。没有命令时记录替代性自检，不虚报。
+计划/设计审批以 PROJECT_START_GATE.md 为唯一详细来源；模式以 DEVELOPMENT_MODES.md 为准。已有授权不重复请求。
 
-Project Start / Plan Approval Gate：复杂、跨系统或高风险新项目在 Implementation 前必须完成需求读取、架构/开发计划，并取得明确用户确认；未通过时 Implementation BLOCKED。FULL 项目还需要第二次设计基线审批（design_gate：PRD/原型/架构基线等设计制品，规则见 `PROJECT_START_GATE.md` 与 `tools/project_start_gate_validate.py`），通过前禁止功能代码。
+- Route：实际解析和预检通过，Worker/模型 Reviewer 与已解析路线一致。
+- Task：可观察目标满足、相关验证通过、真实差异在 scope 内；成功进程与证据一致。
+- Independent Review：不同会话或人工，核对真实交付。审查绑定具体内容及 Git 提交，改变交付后审查失效。
+- Integration：Controller 核对整合后的目标基线，运行必要集成/端到端检查，确认批准需求没有在任务拆分中丢失。
+- Stage/Phase：仅在项目实际存在这些层级时执行，核对该阶段目标、集成路径、风险和状态。
 
-Route Gate：Execution Request 1.3 必须包含确定性 resolved_execution / resolved_review，且 route_preflight.status=pass、exit_code=0、有 evidence。Worker 实际 profile/backend/model/effort 必须与 resolved_execution 一致，除非存在显式 controller_worker_override。
+完整包实际成功门禁必须使用 Contract 1.4 actual CLI，具体操作按需读 DELIVERY_EVIDENCE.md；template 或纯结构检查不等于交付通过。
 
-Task Gate：契约目标满足、真实 Worker invocation 有证据、可重复验证通过、diff 聚焦。
+多任务项目在规划时建立 requirements→tasks/checks 映射，在集成时用 project_acceptance_validate.py 检查覆盖及当前版本的真实检查证据。FAST 复用 Task 验收，不重复创建项目验收表。映射通过不证明任务完成，Controller 仍须核对每个 Task 的独立 Review。
 
-Independent Review Gate：Worker 之后使用独立 Session；模型 Reviewer 必须与 resolved_review 一致并有真实 invocation evidence。Reviewer session 与 Worker session 相同则失败。
+测试按风险和变更范围运行。修复后复验失败项及受影响路径，集成时再做全量/端到端；没有新变化或未解决问题时不反复跑全套。UI 使用真实用户路径，模拟检查不能证明外部系统接通。
 
-Integration Gate：Task commit/diff 与目标基线一致，必要集成检查通过；delegated_worker 只返回证据，不声明项目级 DONE。
-
-Stage Gate：仅在项目实际存在 Stage 时使用；要求该 Stage 的 Task Gate、集成路径和状态/文档一致。
-
-Phase Gate：仅在项目实际存在 Phase 时使用；要求阶段目标、用户验收标准、风险处置和恢复/回滚信息完整。
-
-FAST 可以合并 Task/Review/Integration，但不能绕过命中的 Project Start Gate。STANDARD 默认要求 Task + Independent Review + Integration；FULL 默认要求 Project Start（含 plan 与 design 两次审批）+ Route + Task/Stage/Phase + Independent Review + Integration。
-
-任一 Gate 失败不得以“基本完成”继续依赖工作。
+任一门禁失败不得推进依赖工作；执行层最多返回 REVIEW_PASSED，项目 DONE 由 Controller 决定。流程止于开发验证与集成，不自动部署。

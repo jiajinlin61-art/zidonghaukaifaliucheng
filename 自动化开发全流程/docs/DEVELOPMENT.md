@@ -20,4 +20,10 @@ PyYAML is a development-only dependency for real YAML parsing, including duplica
 
 The 35 task files remain unpublished revision-1 bootstrap seeds: no canonical publication hashes or runtime event history are present. This correction normalizes those seeds without asserting any runtime task completed. Once published, definitions are immutable and changes require a new revision. Historical bootstrap validation notes are not part of the active source of truth; current contracts and real validation results are authoritative.
 
-Phase-gated work records changed paths and actual verification output. A quality gate is not an extra permission request; existing authorization and explicit human stop points remain authoritative. This directory currently has no Git repository, so do not invent HEAD or a clean-worktree claim.
+Phase-gated work records changed paths and actual verification output. A quality gate is not an extra permission request; existing authorization and explicit human stop points remain authoritative. This directory belongs to the parent Git repository. Discover its actual root and dirty state; do not invent a clean-worktree claim.
+
+## Environment and checkout moves
+
+Run `python -B tools/environment_check.py` with the existing project venv before full-rule tools. After moving this directory, refresh its editable install from this directory: `python -m pip install --no-deps -e .`. Pip may obtain the setuptools build dependency already declared in pyproject.toml in an isolated build environment; it does not add runtime dependencies. If offline, report an unavailable build dependency rather than claiming repair succeeded. The test runner uses this checkout's src directly, so a moved editable install cannot silently select another checkout.
+
+Run `python -B tools/workflow_docs_validate.py` after editing entrypoints. Delivery evidence tools only wrap individual authorized commands; they are not a scheduler. Read `ai-development-workflow-v1/policies/DELIVERY_EVIDENCE.md` only when integrating these tools.

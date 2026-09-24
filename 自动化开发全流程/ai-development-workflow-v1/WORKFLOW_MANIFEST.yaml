@@ -1,4 +1,4 @@
-version: V1.1
+version: V1.2
 name: Universal AI Development Workflow
 operating_modes: [standalone_master, delegated_worker]
 mode_options: [FAST, STANDARD, FULL]
@@ -30,7 +30,7 @@ routing_tool: ../tools/model_router.py
 routing_preflight_tool: ../tools/route_preflight.py
 project_start_gate_validator: ../tools/project_start_gate_validate.py
 contract_validator: ../tools/execution_contract_validate.py
-execution_contract_version: "1.3"
+execution_contract_version: "1.4"
 
 required_gates:
   FAST: [project_start_if_triggered, route, combined]
@@ -63,3 +63,8 @@ handoff_templates:
   result: templates/EXECUTION_RESULT.yaml
 
 uads_required: false
+
+context_index: policies/CONTEXT_POLICY.md
+evidence_tool: ../tools/delivery_evidence.py
+result_update_tool: ../tools/evidence_result_update.py
+project_acceptance_validator: ../tools/project_acceptance_validate.py
